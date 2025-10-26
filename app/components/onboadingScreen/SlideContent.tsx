@@ -1,8 +1,7 @@
 import { ANIMATION, OnboardingSlide } from '@/app/constants/slides';
 import React from 'react';
 import { Dimensions, Image, Text, View } from 'react-native';
-import { SharedValue } from 'react-native-reanimated';
-
+import Animated, { interpolate, SharedValue, useAnimatedStyle } from 'react-native-reanimated';
 
 const { width, height } = Dimensions.get('window');
 
@@ -13,29 +12,26 @@ interface SlideContentProps {
   readonly isActive: boolean;
 }
 
-export const SlideContent: React.FC<SlideContentProps> = ({ slide, isActive }) => {
-  if (!isActive) return null;
+export const SlideContent: React.FC<SlideContentProps> = ({ slide, index, progress }) => {
+  const animatedStyle = useAnimatedStyle(() => {
+    const scale = interpolate(progress.value, [index - 1, index, index + 1], [0.8, 1, 0.8]);
+    const opacity = interpolate(progress.value, [index - 0.5, index, index + 0.5], [0, 1, 0]);
+    return {
+      transform: [{ scale }],
+      opacity,
+    };
+  });
 
   return (
-    <View style={styles.slide}>
+    <Animated.View style={[styles.slide, animatedStyle]}>
       <View style={styles.iconContainer}>
-        <Image
-          source={slide.icon}
-          style={styles.icon}
-          resizeMode="contain"
-        />
+        <Image source={slide.icon} style={styles.icon} resizeMode="contain" />
       </View>
-
       <View style={styles.contentContainer}>
-        <Text style={styles.title}>
-          {slide.title}
-        </Text>
-
-        <Text style={styles.description}>
-          {slide.description}
-        </Text>
+        <Text style={styles.title}>{slide.title}</Text>
+        <Text style={styles.description}>{slide.description}</Text>
       </View>
-    </View>
+    </Animated.View>
   );
 };
 
