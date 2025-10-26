@@ -7,6 +7,7 @@ import Animated, {
     withSpring
 } from 'react-native-reanimated';
 import Greetings from './Greetings';
+import CreateHelperCard from './HelperBot';
 
 const { width } = Dimensions.get('window');
 const cardWidth = (width - 48) / 2;
@@ -67,16 +68,9 @@ const agents: Agent[] = [
     gradient: ['#C8E6C9', '#A5D6A7'],
     accentColor: '#66BB6A'
   },
-  { 
-    id: 'agent_6', 
-    name: 'Nova', 
-    desc: 'Self-improvement guide', 
-    icon: '🌟', 
-    featured: true,
-    gradient: ['#E0F2F1', '#B2DFDB'],
-    accentColor: '#00897B'
-  },
 ];
+
+type DataItem = Agent | { type: 'separator' };
 
 const AnimatedTouchableOpacity = Animated.createAnimatedComponent(TouchableOpacity);
 
@@ -106,7 +100,6 @@ const AgentCard = ({ agent }: { agent: Agent }) => {
         animatedStyle,
       ]}
     >
-      {/* Gradient background with icon */}
       <View 
         style={[
           styles.gradientBg,
@@ -117,7 +110,6 @@ const AgentCard = ({ agent }: { agent: Agent }) => {
           }
         ]}
       >
-        {/* Decorative circles */}
         <View
           style={[
             styles.decorCircle1,
@@ -131,7 +123,6 @@ const AgentCard = ({ agent }: { agent: Agent }) => {
           ]}
         />
         
-        {/* Featured badge on image */}
         {agent.featured && (
           <View 
             style={[
@@ -157,12 +148,30 @@ const AgentCard = ({ agent }: { agent: Agent }) => {
 };
 
 const AgentListComp = () => {
+  const dataWithSeparator: DataItem[] = [
+    agents[0],
+    agents[1],
+    { type: 'separator' },
+    ...agents.slice(2),
+  ];
+
   return (
     <View style={styles.container}>
       <FlatList
-        data={agents}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <AgentCard agent={item} />}
+        data={dataWithSeparator}
+        keyExtractor={(item) => 
+          'type' in item ? 'separator' : item.id
+        }
+        renderItem={({ item }) => {
+          if ('type' in item && item.type === 'separator') {
+            return (
+              <View style={styles.fullWidth}>
+                <CreateHelperCard />
+              </View>
+            );
+          }
+          return <AgentCard agent={item as Agent} />;
+        }}
         numColumns={2}
         style={{ marginBottom: 260 }}
         columnWrapperStyle={styles.row}
@@ -171,7 +180,7 @@ const AgentListComp = () => {
         scrollEnabled={true}
         ListHeaderComponent={
           <View style={{ marginBottom: 24 }}>
-            <Greetings />
+            <Greetings /> 
           </View>
         }
       />
@@ -192,6 +201,10 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: 16,
     gap: 12,
+  },
+  fullWidth: {
+    width: '100%',
+    marginBottom: 16,
   },
   card: {
     width: cardWidth,
