@@ -19,10 +19,10 @@ interface TabItem {
 }
 
 const ROUTES: Record<any, any> = {
-  home: '/(tabs)/Home',
-  explore: '/(tabs)/Explore',
-  history: '/(tabs)/History',
-  profile: '/(tabs)/Profile',
+  home: '/(tabs)/home',
+  explore: '/(tabs)/explore',
+  history: '/(tabs)/history',
+  profile: '/(tabs)/profile',
 };
 
 
@@ -113,7 +113,7 @@ function TabBarItem({ tab, isActive, onPress }: TabBarItemProps) {
 export default function TabsLayout() {
   return (
     <>
-      <Stack screenOptions={{ headerShown: false }}>
+      <Stack screenOptions={{ headerShown: false , contentStyle: { paddingTop: 60}}}>
         <Stack.Screen name="home" />
         <Stack.Screen name="explore" />
         <Stack.Screen name="history" />

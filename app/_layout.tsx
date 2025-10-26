@@ -8,7 +8,7 @@ export default function RootLayout() {
       publishableKey={process.env.CLERK_PUBLISHABLE_KEY!}
       tokenCache={tokenCache}
     >
-      <Stack>
+      <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="index" options={{ headerShown: false }} />
       </Stack>
     </ClerkProvider>
