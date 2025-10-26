@@ -1,10 +1,14 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import HomeScreenHeader from '../components/homescreen/HomeScreenHeader';
 
 const Home = () => {
   return (
     <View>
-      <Text>Home</Text>
+        <View style={{ paddingTop: 20, paddingHorizontal: 15,  }}> 
+    <HomeScreenHeader />
+
+        </View>
     </View>
   )
 }

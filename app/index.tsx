@@ -45,7 +45,7 @@ export default function OnboardingScreen() {
 
   useEffect(() => {
     if (isSignedIn) {
-      router.replace("/(tabs)/Home");
+      router.replace("/(tabs)/home");
     }
   }, [isSignedIn]);
 
@@ -99,7 +99,7 @@ export default function OnboardingScreen() {
           });
         }
 
-        router.replace("/(tabs)/Home");
+        router.replace("/(tabs)/home");
       } else {
         console.warn("⚠️ No session created, user may have cancelled sign-in");
       }
