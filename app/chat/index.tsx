@@ -2,6 +2,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useNavigation } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import {
+    Animated,
+    Easing,
     FlatList,
     KeyboardAvoidingView,
     ListRenderItem,
@@ -12,43 +14,61 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
+import { AIChatModel } from '../shared/GlobalApi';
 
-// ✅ Define message type
 type Message = {
-  id: string;
-  role: 'user' | 'assistant';
-  text: string;
+  role: string;
+  content: string;
 };
 
-const initialMessages: Message[] = [
-  { id: '1', role: 'user', text: 'Hiii! How are you?' },
-  { id: '2', role: 'assistant', text: 'I am good! How can I help you today?' },
-  { id: '3', role: 'user', text: 'Tell me a joke 😄' },
-  { id: '4', role: 'assistant', text: 'Why did the math book look sad? Because it had too many problems.' },
-  { id: '5', role: 'user', text: 'Haha that was funny 😂' },
-  { id: '6', role: 'assistant', text: 'Glad you liked it! Want another one?' },
-  { id: '7', role: 'user', text: 'Sure! Hit me with your best one.' },
-  { id: '8', role: 'assistant', text: 'Why can’t your nose be 12 inches long? Because then it would be a foot!' },
-  { id: '9', role: 'user', text: 'That’s actually clever 😄' },
-  { id: '10', role: 'assistant', text: 'Thanks! I’ve got plenty more where that came from.' },
-  { id: '11', role: 'user', text: 'Okay, but can you tell me something motivational?' },
-  { id: '12', role: 'assistant', text: 'Every day is a new chance to become a better version of yourself.' },
-  { id: '13', role: 'user', text: 'That’s nice. I needed that today.' },
-  { id: '14', role: 'assistant', text: 'I’m happy to hear that 😊 Always here to cheer you up.' },
-  { id: '15', role: 'user', text: 'What’s your favorite color?' },
-  { id: '16', role: 'assistant', text: 'I’d say orange — it’s bright and creative! What about you?' },
-  { id: '17', role: 'user', text: 'Mine’s blue. It’s calm and peaceful.' },
-  { id: '18', role: 'assistant', text: 'A perfect choice! Blue gives off serene vibes.' },
-  { id: '19', role: 'user', text: 'You sound like a color psychologist 😂' },
-  { id: '20', role: 'assistant', text: 'Haha maybe I am! I’ve got shades of wisdom all over me 🎨' },
-];
+const TypingIndicator = () => {
+  const dot1 = useRef(new Animated.Value(0)).current;
+  const dot2 = useRef(new Animated.Value(0)).current;
+  const dot3 = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const animateDot = (dot: Animated.Value, delay: number) => {
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(dot, {
+            toValue: -4,
+            duration: 250,
+            delay,
+            easing: Easing.ease,
+            useNativeDriver: true,
+          }),
+          Animated.timing(dot, {
+            toValue: 0,
+            duration: 250,
+            easing: Easing.ease,
+            useNativeDriver: true,
+          }),
+        ])
+      ).start();
+    };
+
+    animateDot(dot1, 0);
+    animateDot(dot2, 150);
+    animateDot(dot3, 300);
+  }, []);
+
+  return (
+    <View style={styles.typingContainer}>
+      <Animated.View style={[styles.dot, { transform: [{ translateY: dot1 }] }]} />
+      <Animated.View style={[styles.dot, { transform: [{ translateY: dot2 }] }]} />
+      <Animated.View style={[styles.dot, { transform: [{ translateY: dot3 }] }]} />
+    </View>
+  );
+};
 
 const ChatSection: React.FC = () => {
-  const navigation = useNavigation<any>(); // 👈 you can type your stack params if you have them
-  const { agentName } = useLocalSearchParams<{ agentName?: string }>();
+  const navigation = useNavigation<any>();
+  const { agentName, agentPrompt } = useLocalSearchParams<{ agentName?: string; agentPrompt?: string }>();
 
-  const [messages, setMessages] = useState<Message[]>(initialMessages);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [systemPrompt, setSystemPrompt] = useState<string>('');
   const [input, setInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const flatListRef = useRef<FlatList<Message>>(null);
 
   useEffect(() => {
@@ -68,20 +88,57 @@ const ChatSection: React.FC = () => {
     });
   }, [navigation, agentName]);
 
-  const handleSend = () => {
-    if (!input.trim()) return;
+  useEffect(() => {
+    if (agentPrompt) {
+      const prompt = agentPrompt.toString();
+      setSystemPrompt(prompt);
+      getInitialMessage(prompt);
+    }
+  }, [agentPrompt]);
+
+  const getInitialMessage = async (prompt: string) => {
+    try {
+      setIsLoading(true);
+      const result = await AIChatModel([
+        { role: 'system', content: prompt },
+        { role: 'user', content: 'Hello, start by introducing yourself.' },
+      ]);
+      if (result) {
+        setMessages([result]);
+      }
+    } catch (error) {
+      console.error('Error getting initial message:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSend = async () => {
+    if (!input.trim() || isLoading) return;
+
     const newMessage: Message = {
-      id: Date.now().toString(),
       role: 'user',
-      text: input.trim(),
+      content: input.trim(),
     };
     setMessages((prev) => [...prev, newMessage]);
     setInput('');
 
-    setTimeout(() => {
-      flatListRef.current?.scrollToEnd({ animated: true });
-    }, 100);
+    try {
+      setIsLoading(true);
+      const messagesToSend = [{ role: 'system', content: systemPrompt }, ...messages, newMessage];
+      const result = await AIChatModel(messagesToSend);
+      if (result) {
+        setMessages((prev) => [...prev, result]);
+      }
+    } catch (error) {
+      console.error('Error sending message:', error);
+    } finally {
+      setIsLoading(false);
+      setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 100);
+    }
   };
+
+  const displayMessages = messages.filter((msg) => msg.role !== 'system');
 
   const renderMessage: ListRenderItem<Message> = ({ item }) => (
     <View
@@ -96,7 +153,7 @@ const ChatSection: React.FC = () => {
           item.role === 'user' ? styles.userText : styles.assistantText,
         ]}
       >
-        {item.text}
+        {item.content}
       </Text>
     </View>
   );
@@ -109,14 +166,13 @@ const ChatSection: React.FC = () => {
     >
       <FlatList
         ref={flatListRef}
-        data={messages}
-        keyExtractor={(item) => item.id}
+        data={displayMessages}
+        keyExtractor={(item, index) => index.toString()}
         renderItem={renderMessage}
         contentContainerStyle={styles.chatContainer}
         showsVerticalScrollIndicator={false}
-        onContentSizeChange={() =>
-          flatListRef.current?.scrollToEnd({ animated: true })
-        }
+        onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
+        ListFooterComponent={isLoading ? <TypingIndicator /> : null}
       />
 
       <View style={styles.inputWrapper}>
@@ -127,13 +183,15 @@ const ChatSection: React.FC = () => {
             value={input}
             onChangeText={setInput}
             placeholderTextColor="#999"
+            editable={!isLoading}
           />
           <TouchableOpacity
-            style={styles.sendButton}
+            style={[styles.sendButton, isLoading && styles.sendButtonDisabled]}
             onPress={handleSend}
             activeOpacity={0.7}
+            disabled={isLoading}
           >
-            <Ionicons name="send" size={20} color="#fff" />
+            <Ionicons name={isLoading ? 'hourglass' : 'send'} size={20} color="#fff" />
           </TouchableOpacity>
         </View>
       </View>
@@ -220,5 +278,24 @@ const styles = StyleSheet.create({
     borderRadius: 19,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  sendButtonDisabled: {
+    backgroundColor: '#ffaa99',
+  },
+  typingContainer: {
+    flexDirection: 'row',
+    alignSelf: 'flex-start',
+    backgroundColor: '#E6E6E6',
+    borderRadius: 16,
+    padding: 10,
+    marginTop: 4,
+    marginBottom: 12,
+  },
+  dot: {
+    width: 8,
+    height: 8,
+    backgroundColor: '#888',
+    borderRadius: 4,
+    marginHorizontal: 3,
   },
 });
