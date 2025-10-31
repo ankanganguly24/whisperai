@@ -115,7 +115,7 @@ const History = () => {
   return (
     <View style={styles.container}>
       <Animated.Text entering={FadeInDown} style={styles.header}>
-        Recent Bots
+       History 
       </Animated.Text>
 
       <Animated.FlatList
