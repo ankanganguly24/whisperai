@@ -16,12 +16,7 @@ import {
   startAfter,
   where,
 } from "firebase/firestore";
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Dimensions,
@@ -206,7 +201,12 @@ const Explore = () => {
       </View>
 
       <View style={styles.searchContainer}>
-        <Ionicons name="search" size={20} color="#666" style={styles.searchIcon} />
+        <Ionicons
+          name="search"
+          size={20}
+          color="#666"
+          style={styles.searchIcon}
+        />
         <TextInput
           style={styles.searchInput}
           placeholder="Search agents by name..."
@@ -236,7 +236,6 @@ const Explore = () => {
         }
         ListHeaderComponent={
           <>
-            {/* ── My Agents ── */}
             <Animated.View entering={FadeInDown}>
               <View style={styles.sectionHeader}>
                 <Text style={styles.sectionTitle}>My Agents</Text>
@@ -249,7 +248,9 @@ const Explore = () => {
 
               {myAgents.length === 0 ? (
                 <View style={styles.emptyMyAgents}>
-                  <Text style={styles.emptyText}>No agents yet. Create one!</Text>
+                  <Text style={styles.emptyText}>
+                    No agents yet. Create one!
+                  </Text>
                 </View>
               ) : (
                 <View style={styles.myAgentsGrid}>
@@ -277,7 +278,13 @@ const Explore = () => {
               onPress={() =>
                 router.push({
                   pathname: "/chat",
-                  params: { agentName: item.name, id: item.id },
+                  params: {
+                    id: item.id,
+                    agentName: item.name,
+                    agentDesc: item.description,
+                    initialText: item.description,
+                    agentPrompt: item.description,
+                  },
                 })
               }
             />
@@ -318,7 +325,11 @@ const Explore = () => {
           style={styles.modalOverlay}
           behavior={Platform.OS === "ios" ? "padding" : "height"}
         >
-          <BlurView intensity={90} tint="dark" style={StyleSheet.absoluteFill} />
+          <BlurView
+            intensity={90}
+            tint="dark"
+            style={StyleSheet.absoluteFill}
+          />
           <Pressable
             style={styles.modalBackdrop}
             onPress={() => setModalVisible(false)}
@@ -543,7 +554,12 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: "#fff",
   },
-  agentName: { fontSize: 16, fontWeight: "700", color: "#111", marginBottom: 4 },
+  agentName: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#111",
+    marginBottom: 4,
+  },
   agentDesc: { fontSize: 13, color: "#666", lineHeight: 18 },
 
   // ── Skeleton ──
@@ -630,5 +646,10 @@ const styles = StyleSheet.create({
   cancelText: { color: "#666", fontWeight: "600" },
   createBtn: { backgroundColor: "#ff4400" },
   createBtnText: { color: "#fff", fontWeight: "700" },
-  noAgentsText: { textAlign: "center", marginTop: 40, fontSize: 14, color: "#888" },
+  noAgentsText: {
+    textAlign: "center",
+    marginTop: 40,
+    fontSize: 14,
+    color: "#888",
+  },
 });
