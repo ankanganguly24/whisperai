@@ -1,19 +1,25 @@
 import { useAuth, useUser } from "@clerk/clerk-expo";
 import { Feather } from "@expo/vector-icons";
 import { Image } from "expo-image";
+import { useRouter } from "expo-router";
+import * as Updates from "expo-updates";
 import React from "react";
-import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
+import {
+  Alert,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 
 const HomeScreenHeader = () => {
   const { user, isSignedIn } = useUser();
   const { signOut } = useAuth();
+  const router = useRouter();
 
   const handleProPress = () => {
-    console.log("Pro button pressed");
-  };
-
-  const handleSettingsPress = () => {
-    console.log("Settings button pressed");
+    router.push("/profile");
   };
 
   const handleLogoutPress = () => {
@@ -28,7 +34,15 @@ const HomeScreenHeader = () => {
           onPress: async () => {
             try {
               await signOut();
-              console.log("✅ Logged out successfully");
+              router.replace("/");
+
+              setTimeout(async () => {
+                if (Platform.OS === "web") {
+                  window.location.reload();
+                } else {
+                  await Updates.reloadAsync();
+                }
+              }, 300);
             } catch (err) {
               console.error("Logout error:", err);
             }
@@ -68,20 +82,6 @@ const HomeScreenHeader = () => {
             />
           </Pressable>
 
-          {/* ✅ Settings Button */}
-          <Pressable
-            style={({ pressed }) => [
-              styles.iconButton,
-              pressed && { opacity: 0.5 },
-            ]}
-            onPress={handleSettingsPress}
-            hitSlop={12}
-            android_ripple={{ color: "rgba(0,0,0,0.1)" }}
-          >
-            <Feather name="settings" size={20} color="#000" />
-          </Pressable>
-
-          {/* ✅ Logout Button */}
           {isSignedIn && (
             <Pressable
               style={({ pressed }) => [
