@@ -31,7 +31,6 @@ type Message = {
   content: string;
 };
 
-// ------------------- Typing Indicator -------------------
 const TypingIndicator = () => {
   const dot1 = useRef(new Animated.Value(0)).current;
   const dot2 = useRef(new Animated.Value(0)).current;
@@ -72,7 +71,6 @@ const TypingIndicator = () => {
   );
 };
 
-// ------------------- Chat Section -------------------
 const ChatSection: React.FC = () => {
   const navigation = useNavigation<any>();
   const { agentName, agentPrompt } = useLocalSearchParams<{
@@ -88,7 +86,6 @@ const ChatSection: React.FC = () => {
   const [docId, setDocId] = useState<string>("");
   const { user } = useUser();
 
-  // ------------------- Setup Header -------------------
   useEffect(() => {
     navigation.setOptions({
       headerShown: true,
@@ -106,7 +103,6 @@ const ChatSection: React.FC = () => {
     });
   }, [navigation, agentName]);
 
-  // ------------------- Load or Create Chat -------------------
   useEffect(() => {
     if (!user?.primaryEmailAddress?.emailAddress || !agentName) return;
     const userEmail = user.primaryEmailAddress.emailAddress;
@@ -146,7 +142,6 @@ const ChatSection: React.FC = () => {
     fetchOrCreateChat();
   }, [user, agentName, agentPrompt]);
 
-  // ------------------- Get Initial Message -------------------
   const getInitialMessage = async (prompt: string) => {
     if (!prompt) return;
     try {
@@ -165,7 +160,6 @@ const ChatSection: React.FC = () => {
     }
   };
 
-  // ------------------- Send Message -------------------
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
 
@@ -195,7 +189,6 @@ const ChatSection: React.FC = () => {
     }
   };
 
-  // ------------------- Auto-Save to Firestore -------------------
   useEffect(() => {
     if (!docId || !user?.primaryEmailAddress?.emailAddress) return;
 
@@ -222,7 +215,6 @@ const ChatSection: React.FC = () => {
     saveMessages();
   }, [messages]);
 
-  // ------------------- Render -------------------
   const displayMessages = messages.filter((msg) => msg.role !== "system");
 
   const renderMessage: ListRenderItem<Message> = ({ item }) => (
@@ -292,7 +284,6 @@ const ChatSection: React.FC = () => {
 
 export default ChatSection;
 
-// ------------------- Styles -------------------
 const styles = StyleSheet.create({
   container: {
     flex: 1,
