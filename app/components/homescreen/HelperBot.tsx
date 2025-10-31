@@ -1,11 +1,12 @@
+import { useRouter } from 'expo-router';
 import React, { useEffect } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Animated, {
-    useAnimatedStyle,
-    useSharedValue,
-    withRepeat,
-    withSpring,
-    withTiming
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withSpring,
+  withTiming
 } from 'react-native-reanimated';
 
 const AnimatedView = Animated.createAnimatedComponent(View);
@@ -16,8 +17,8 @@ const CreateHelperCard = () => {
   const scale = useSharedValue(1);
   const floatY = useSharedValue(0);
   const pressScale = useSharedValue(1);
+  const router = useRouter()
 
-  // Floating animation for decorative elements
   useEffect(() => {
     floatY.value = withRepeat(
       withTiming(20, { duration: 3000 }),
@@ -26,7 +27,6 @@ const CreateHelperCard = () => {
     );
   }, [floatY]);
 
-  // Rotating animation for the plus icon
   useEffect(() => {
     rotation.value = withRepeat(
       withTiming(360, { duration: 4000 }),
@@ -57,19 +57,18 @@ const CreateHelperCard = () => {
 
   return (
     <AnimatedTouchableOpacity
+      onPress={()=> router.push("/explore")}
       activeOpacity={0.9}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
       style={[styles.card, animatedPress]}
     >
-      {/* Gradient background */}
       <AnimatedView
         style={[
           styles.banner,
           animatedFloat,
         ]}
       >
-        {/* Decorative circles */}
         <View
           style={[
             styles.decorCircle1,
@@ -81,12 +80,10 @@ const CreateHelperCard = () => {
           ]}
         />
 
-        {/* Rotating plus icon */}
         <Animated.Text style={[styles.plusIcon, animatedRotation]}>
           ➕
         </Animated.Text>
 
-        {/* Content */}
         <Text style={styles.mainText}>Create Your Own Helper</Text>
         <Text style={styles.subText}>Tap me</Text>
       </AnimatedView>
