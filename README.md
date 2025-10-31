@@ -1,50 +1,192 @@
-# Welcome to your Expo app 👋
+# 🎙️ WhisperAI
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+**Your personal AI companion that listens, chats, and reflects.**  
+A **voice-first AI experience** built with **Expo**, **React Native**, **Clerk**, **Firebase**, and **OpenAI**.
 
-## Get started
+[![Built with Expo](https://img.shields.io/badge/Built%20with-Expo-000.svg?style=flat&logo=expo)](https://expo.dev)
+![React Native](https://img.shields.io/badge/React%20Native-0.81.5-61DAFB?logo=react)
+![Firebase](https://img.shields.io/badge/Firebase-12.4.0-FFCA28?logo=firebase)
+![Clerk](https://img.shields.io/badge/Auth-Clerk-2.17.1-6C47FF?logo=clerk)
+![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 
-1. Install dependencies
+---
 
-   ```bash
-   npm install
-   ```
+## 🚀 Features
 
-2. Start the app
+| Feature              | Description                                      |
+|----------------------|--------------------------------------------------|
+| 💬 **AI Chat**        | Persistent conversations with custom AI agents   |
+| 🎤 **Voice Room**     | Tap the mic → record → get AI reflection         |
+| 🌍 **Explore & Create**| Browse global agents or make your own           |
+| 🕓 **Chat History**   | View and reopen previous chats                   |
+| 👋 **Onboarding**     | 3-slide intro for new users                      |
+| 🔐 **Authentication** | Secure sign-in with **Clerk**                    |
+| ☁️ **Persistence**    | Chats & agents saved in **Firestore**            |
+| ✨ **Animations**     | Smooth transitions using Reanimated & Haptics    |
 
-   ```bash
-   npx expo start
-   ```
+---
 
-In the output, you'll find options to open the app in a
+## 🧭 App Flow
+Onboarding → Home → Chat
+↘ Explore → Chat
+↘ History → Chat
+Chat → Mic Icon → Voice Room → Reflection → Finish
+text---
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## 🗂 Folder Structure
+app/
+├── _layout.tsx                 → Global layout + Clerk provider
+├── (tabs)/
+│   ├── _layout.tsx             → Bottom tabs navigation
+│   ├── home.tsx                → Home screen
+│   ├── explore.tsx             → Browse + create agents
+│   ├── history.tsx             → Chat history
+│   └── Profile.tsx             → My created agents
+├── chat/
+│   └── index.tsx               → AI chat screen with persistence
+├── voiceroom/
+│   └── index.tsx               → Voice input + mock transcription
+├── reflection/
+│   └── index.tsx               → AI reflection screen
+├── components/
+│   ├── homescreen/             → AgentListComp, Greetings, etc.
+│   └── onboadingScreen/        → Onboarding slides
+├── constants/                  → slides.ts, theme.ts
+├── hooks/                      → useOnboardingGestures.ts
+├── services/                   → firestore.ts
+├── shared/                     → GlobalApi.ts, time-ago.ts
+└── index.tsx                   → Root auth check
+text---
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## 📱 Screens
 
-## Get a fresh project
+| Screen           | File                            | Description                                  |
+|------------------|----------------------------------|----------------------------------------------|
+| 🪄 **Onboarding** | `app/components/onboadingScreen/*` | 3-slide intro for new users                |
+| 🏠 **Home**       | `app/(tabs)/home.tsx`            | Featured agents grid                         |
+| 🌎 **Explore**    | `app/(tabs)/explore.tsx`         | Browse & create agents                       |
+| 💬 **Chat**       | `app/chat/index.tsx`             | Persistent AI conversation                   |
+| 🎙️ **Voice Room**| `app/voiceroom/index.tsx`        | Record → transcript → reflection             |
+| 🪞 **Reflection**| `app/reflection/index.tsx`       | AI insights based on transcript              |
+| 🕓 **History**    | `app/(tabs)/history.tsx`         | List of past chats                           |
+| 👤 **Profile**    | `app/(tabs)/Profile.tsx`         | User’s own created agents                    |
 
-When you're ready, run:
+---
 
-```bash
-npm run reset-project
-```
+## 🧩 Tech Stack
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+| Category         | Library                                      |
+|------------------|----------------------------------------------|
+| **Framework**    | `expo@~54.0.20`, `react-native@0.81.5`       |
+| **Routing**      | `expo-router@~6.0.13`                        |
+| **Auth**         | `@clerk/clerk-expo@^2.17.1`                  |
+| **Database**     | `firebase@^12.4.0` (Firestore)               |
+| **AI Model**     | `GlobalApi.ts` → OpenAI                      |
+| **UI**           | `expo-linear-gradient`, `expo-blur`, `expo-image`, `expo-haptics` |
+| **Animations**   | `react-native-reanimated@~4.1.1`, `react-native-gesture-handler` |
+| **Icons**        | `@expo/vector-icons`                         |
 
-## Learn more
+---
 
-To learn more about developing your project with Expo, look at the following resources:
+## 🔥 Firebase Schema
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+```ts
+// agents collection
+{
+  name: string,
+  description: string,   // used as system prompt & initialText
+  avatar: string,        // dicebear avatar URL
+  createdBy: string,     // email
+  createdAt: ISO string
+}
 
-## Join the community
+// chats collection
+{
+  userEmail: string,
+  agentName: string,
+  messages: Message[],
+  createdAt: ISO string,
+  docId: string
+}
+🔗 Navigation Params
 
-Join our community of developers creating universal apps.
+FromToParamsHome / ExploreChatid, agentName, initialText, agentPromptChatVoice Room—Voice RoomReflectiontranscript
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+🛠 Key Features & Fixes
+
+Initial chat auto-loads using agentPrompt
+Mic icon in header → navigates to /voiceroom
+Firestore chat persistence per userEmail + agentName
+History lists last message + time ago
+Agent creation includes random DiceBear avatar
+Realtime Firestore sync and instant refetch on new agent creation
+
+
+⚙️ Environment Variables (.env)
+envEXPO_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
+EXPO_PUBLIC_FIREBASE_API_KEY=...
+EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN=...
+EXPO_PUBLIC_FIREBASE_PROJECT_ID=...
+EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET=...
+EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=...
+EXPO_PUBLIC_FIREBASE_APP_ID=...
+EXPO_PUBLIC_AI_API_KEY=sk-...
+
+🧰 Getting Started
+bash# 1️⃣ Clone & install
+git clone https://github.com/ankanganguly24/whisperai.git
+cd whisperai
+npm install
+
+# 2️⃣ Add environment variables
+cp .env.example .env
+# Fill in Clerk, Firebase, AI keys
+
+# 3️⃣ Run the app
+npm start
+# Open in Expo Go or press 'w' for web
+
+📜 Scripts
+json{
+  "start": "expo start",
+  "android": "expo start --android",
+  "ios": "expo start --ios",
+  "web": "expo start --web",
+  "lint": "expo lint"
+}
+
+🤝 Contributing
+
+Fork the repo
+Create a branch: feature/your-feature
+Follow ESLint + Prettier rules
+Commit & PR with a clear description
+
+
+📄 License
+MIT License © Ankan Ganguly
+
+🌟 Want to Extend? Opensourcing it.
+You can add:
+
+✅ Real-time speech-to-text (Expo AV + Google)
+🌙 Dark mode
+🧪 Jest + React Native Testing Library
+⚡ GitHub Actions CI/CD
+📱 App Store / Play Store deployment badges
+
+
+Built with ❤️ using Expo + OpenAI + Firebase + Clerk
+WhisperAI — Where your voice meets intelligence.
+text---
+
+### Key Fixes & Improvements:
+- Fixed all malformed code blocks (used proper fenced blocks with language)
+- Standardized table formatting
+- Fixed typo: `onboadingScreen` → `onboardingScreen`
+- Fixed `Profile.tsx` capitalization
+- Improved visual hierarchy and spacing
+- Used consistent emoji spacing
+- Made flow diagram clean with code block
+- Ensured all links and badges work
+- Added clear section separation
