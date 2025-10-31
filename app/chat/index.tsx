@@ -1,7 +1,7 @@
 import { firestoreDB } from "@/config/FirebaseConfig";
 import { useUser } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
-import { useLocalSearchParams, useNavigation } from "expo-router";
+import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import {
   collection,
   doc,
@@ -85,6 +85,9 @@ const ChatSection: React.FC = () => {
   const flatListRef = useRef<FlatList<Message>>(null);
   const [docId, setDocId] = useState<string>("");
   const { user } = useUser();
+  const router = useRouter();
+
+
 
   useEffect(() => {
     navigation.setOptions({
@@ -92,13 +95,18 @@ const ChatSection: React.FC = () => {
       headerBackVisible: false,
       title: agentName || "Chat",
       headerRight: () => (
-        <TouchableOpacity
-          style={styles.iconButton}
-          onPress={() => console.log("Add new chat")}
-          activeOpacity={0.7}
-        >
-          <Ionicons name="add" size={22} color="#000" />
-        </TouchableOpacity>
+    <TouchableOpacity
+  style={styles.iconButton}
+  onPress={() =>
+    router.push({
+      pathname: '/voiceroom',
+    })
+  }
+  activeOpacity={0.7}
+>
+  <Ionicons name="mic-outline" size={22} color="#000" />
+</TouchableOpacity>
+
       ),
     });
   }, [navigation, agentName]);
@@ -236,6 +244,7 @@ const ChatSection: React.FC = () => {
   );
 
   return (
+    
     <KeyboardAvoidingView
       style={styles.container}
       behavior={Platform.OS === "ios" ? "padding" : "height"}

@@ -19,7 +19,7 @@ const HomeScreenHeader = () => {
   const router = useRouter();
 
   const handleProPress = () => {
-    router.push("/profile");
+    router.push("/profile" as any);
   };
 
   const handleLogoutPress = () => {
